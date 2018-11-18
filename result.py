@@ -9,6 +9,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class ResultWidget(object):
+    def __init__(self, data):
+        self.miasto = '\nmiasta o współrzędnych {} {}'.format(data["data"][0], data["data"][1]) if data["geo"] else data["data"] 
+        
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(724, 568)
@@ -39,6 +42,8 @@ class ResultWidget(object):
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
+        self.label.setText('Oto pogoda dla miasta {}'.format(self.miasto))
+
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
@@ -51,7 +56,7 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     Form = QtWidgets.QWidget()
-    ui = ResultWidget()
+    ui = ResultWidget('Kraków')
     ui.setupUi(Form)
     Form.show()
     sys.exit(app.exec_())

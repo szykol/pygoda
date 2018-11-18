@@ -16,19 +16,26 @@ class Ui_MainWindow(object):
         MainWindow.resize(800, 600)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
+        self.gridLayout.setObjectName("gridLayout")
         self.stackedWidget = QtWidgets.QStackedWidget(self.centralwidget)
-        self.stackedWidget.setGeometry(QtCore.QRect(0, 0, 791, 551))
         self.stackedWidget.setObjectName("stackedWidget")
         
         locationWidget = QtWidgets.QWidget()
-        ui = LocationWidget()
+        self.location_ui = ui = LocationWidget()
         ui.setupUi(locationWidget)
+
         ui.pushButton.clicked.connect(self.click)
+        ui.city_edit.textEdited.connect(self.clear_lat_lng)
+        ui.lng_edit.textEdited.connect(self.clear_city)
+        ui.lat_edit.textEdited.connect(self.clear_city)
 
         self.stackedWidget.addWidget(locationWidget)
+        
+        self.gridLayout.addWidget(self.stackedWidget, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 26))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -38,18 +45,49 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        self.location_ui.pushButton.setDisabled(True)
+        self.location_ui.lat_edit.setValidator(QtGui.QDoubleValidator(-90.0, 90.0, 6))
+        self.location_ui.lng_edit.setValidator(QtGui.QDoubleValidator(-180.0, 180.0, 6))
+
+        self.geo = None
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "pygoda"))
 
-
     def click(self):
+        data = {
+            "geo": self.geo,
+            "data": [self.location_ui.lng_edit.text(), self.location_ui.lat_edit.text()] if self.geo else 
+            self.location_ui.city_edit.text()
+        }
         resultWidget = QtWidgets.QWidget()
-        ui = ResultWidget()
+        print(data)
+        ui = ResultWidget(data)
         ui.setupUi(resultWidget)
         self.stackedWidget.addWidget(resultWidget)
         self.stackedWidget.setCurrentWidget(resultWidget)
 
+    def clear_city(self):
+        self.location_ui.city_edit.clear()
+        self.update_button()
+    
+    def clear_lat_lng(self):
+        self.location_ui.lat_edit.clear()
+        self.location_ui.lng_edit.clear()
+        self.update_button()
+
+    def update_button(self):
+        if self.location_ui.city_edit.text():
+            self.location_ui.pushButton.setDisabled(False)
+            self.geo = False
+        elif self.location_ui.lng_edit.text() and self.location_ui.lat_edit.text():
+            self.location_ui.pushButton.setDisabled(False)
+            self.geo = True
+        else:
+            self.location_ui.pushButton.setDisabled(True)
+            self.geo = None
+        
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)

@@ -1,6 +1,6 @@
 *.stackdump
 __pycache__/
 *.exe
-//req.py
-//coordinates.py
+req.py
+coordinates.py
 *.png

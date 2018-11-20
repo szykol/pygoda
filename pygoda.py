@@ -9,6 +9,8 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from location import LocationWidget
 from result import ResultWidget
+from error import ErrorWidget
+from req import WeatherApi
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -56,15 +58,23 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "pygoda"))
 
     def click(self):
-        data = {
-            "geo": self.geo,
-            "data": [self.location_ui.lng_edit.text(), self.location_ui.lat_edit.text()] if self.geo else 
-            self.location_ui.city_edit.text()
-        }
-        print(data)
+        api = WeatherApi()
+        if self.geo:
+            lon, lat = self.location_ui.lng_edit.text(), self.location_ui.lat_edit.text()
+            data = api.coord_weather(lon, lat)
+            data['city'] = f'{lon}, {lat}'.replace(',','.')
+        else:
+            data = api.city_weather(self.location_ui.city_edit.text())
+            data['city'] = self.location_ui.city_edit.text()
+
         resultWidget = QtWidgets.QWidget()
-        ui = ResultWidget(data)
+        if(data['status'] == 'ok'):
+            ui = ResultWidget(data)
+        else:
+            ui = ErrorWidget()
+
         ui.setupUi(resultWidget)
+        ui.back_button.clicked.connect(self.spawn_main_window)
         self.stackedWidget.addWidget(resultWidget)
         self.stackedWidget.setCurrentWidget(resultWidget)
 
@@ -75,6 +85,7 @@ class Ui_MainWindow(object):
     def clear_lat_lng(self):
         self.location_ui.lat_edit.clear()
         self.location_ui.lng_edit.clear()
+        self.location_ui.city_edit.setText(self.location_ui.city_edit.text().capitalize())
         self.update_button()
 
     def update_button(self):
@@ -87,6 +98,9 @@ class Ui_MainWindow(object):
         else:
             self.location_ui.pushButton.setDisabled(True)
             self.geo = None
+
+    def spawn_main_window(self):
+        self.stackedWidget.removeWidget(self.stackedWidget.currentWidget())
         
 if __name__ == "__main__":
     import sys

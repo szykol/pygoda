@@ -8,65 +8,92 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from req import WeatherApi
+import urllib 
 
 class ResultWidget(object):
     def __init__(self, data):
-        self.miasto = '\nmiasta o współrzędnych {} {}'.format(data["data"][0], data["data"][1]) if data["geo"] else data["data"] 
+        self.miasto = data['city']
         self.data = data
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(724, 568)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
+        self.verticalLayout.setContentsMargins(5, 5, 5, 5)
+        self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.label = QtWidgets.QLabel(Form)
+        self.city_name = QtWidgets.QLabel(Form)
         font = QtGui.QFont()
         font.setPointSize(28)
-        self.label.setFont(font)
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.label.setObjectName("label")
-        self.verticalLayout.addWidget(self.label)
-        self.label_2 = QtWidgets.QLabel(Form)
+        self.city_name.setFont(font)
+        self.city_name.setAlignment(QtCore.Qt.AlignCenter)
+        self.city_name.setObjectName("city_name")
+        self.verticalLayout.addWidget(self.city_name)
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_2.setSpacing(0)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.temperature = QtWidgets.QLabel(Form)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.temperature.sizePolicy().hasHeightForWidth())
+        self.temperature.setSizePolicy(sizePolicy)
+        self.temperature.setMinimumSize(QtCore.QSize(702, 75))
         font = QtGui.QFont()
         font.setPointSize(22)
-        self.label_2.setFont(font)
-        self.label_2.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_2.setObjectName("label_2")
-        self.verticalLayout.addWidget(self.label_2)
-        self.label_3 = QtWidgets.QLabel(Form)
+        self.temperature.setFont(font)
+        self.temperature.setStyleSheet("padding: 0")
+        self.temperature.setAlignment(QtCore.Qt.AlignCenter)
+        self.temperature.setObjectName("temperature")
+        self.verticalLayout_2.addWidget(self.temperature)
+        self.img = QtWidgets.QLabel(Form)
+        self.img.setMinimumSize(QtCore.QSize(0, 0))
+        self.img.setText("")
+        self.img.setObjectName("img")
+        self.verticalLayout_2.addWidget(self.img, 0, QtCore.Qt.AlignHCenter)
+        self.verticalLayout.addLayout(self.verticalLayout_2)
+        self.description = QtWidgets.QLabel(Form)
         font = QtGui.QFont()
         font.setPointSize(25)
-        self.label_3.setFont(font)
-        self.label_3.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_3.setObjectName("label_3")
-        self.verticalLayout.addWidget(self.label_3)
+        self.description.setFont(font)
+        self.description.setAlignment(QtCore.Qt.AlignCenter)
+        self.description.setObjectName("description")
+        self.verticalLayout.addWidget(self.description)
+        self.back_button = QtWidgets.QPushButton(Form)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.back_button.sizePolicy().hasHeightForWidth())
+        self.back_button.setSizePolicy(sizePolicy)
+        self.back_button.setMinimumSize(QtCore.QSize(85, 60))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.back_button.setFont(font)
+        self.back_button.setStyleSheet("margin-bottom: 20")
+        self.back_button.setObjectName("back_button")
+        self.verticalLayout.addWidget(self.back_button, 0, QtCore.Qt.AlignHCenter)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
-
-        self.label.setText('Oto pogoda dla miasta {}'.format(self.miasto))
+        self.city_name.setText(self.miasto)
         self.get_weather()
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.label.setText(_translate("Form", "Pogoda dla miasta Kraków"))
-        self.label_2.setText(_translate("Form", "22℃"))
-        self.label_3.setText(_translate("Form", "Słonecznie"))
+        self.city_name.setText(_translate("Form", "Miasto"))
+        self.temperature.setText(_translate("Form", "22℃"))
+        self.description.setText(_translate("Form", "Słonecznie"))
+        self.back_button.setText(_translate("Form", "Gotowe"))
 
     def get_weather(self):
-        api = WeatherApi()
-        #weather = None
-
-        if self.data['geo']:
-            lon = self.data['data'][0]
-            lat = self.data['data'][1]
-            data = api.coord_weather(lon, lat)
-        else:
-            data = api.city_weather(self.data['data'])
-
+        data = self.data
         if data['status'] == "ok":
-            self.label_3.setText(data['main'])
-            self.label_2.setText(data['temp'])
-        else:
-            self.label_3.setText('Wprowadzono nieprawidłowe dane')
+            self.description.setText(data['main'])
+            self.temperature.setText(data['temp'])
+            pix = QtGui.QPixmap()
+            url = f'http://openweathermap.org/img/w/{data["icon"]}.png'
+            img_data = urllib.request.urlopen(url).read()
+            pix.loadFromData(img_data)
+            self.img.setPixmap(pix)
+            self.img.show()

@@ -7,11 +7,13 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from req import WeatherApi
 
 class ResultWidget(object):
     def __init__(self, data):
         self.miasto = '\nmiasta o współrzędnych {} {}'.format(data["data"][0], data["data"][1]) if data["geo"] else data["data"] 
-        
+        self.data = data
+
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(724, 568)
@@ -43,6 +45,7 @@ class ResultWidget(object):
         QtCore.QMetaObject.connectSlotsByName(Form)
 
         self.label.setText('Oto pogoda dla miasta {}'.format(self.miasto))
+        self.get_weather()
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
@@ -51,13 +54,19 @@ class ResultWidget(object):
         self.label_2.setText(_translate("Form", "22℃"))
         self.label_3.setText(_translate("Form", "Słonecznie"))
 
+    def get_weather(self):
+        api = WeatherApi()
+        #weather = None
 
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    Form = QtWidgets.QWidget()
-    ui = ResultWidget('Kraków')
-    ui.setupUi(Form)
-    Form.show()
-    sys.exit(app.exec_())
+        if self.data['geo']:
+            lon = self.data['data'][0]
+            lat = self.data['data'][1]
+            data = api.coord_weather(lon, lat)
+        else:
+            data = api.city_weather(self.data['data'])
 
+        if data['status'] == "ok":
+            self.label_3.setText(data['main'])
+            self.label_2.setText(data['temp'])
+        else:
+            self.label_3.setText('Wprowadzono nieprawidłowe dane')

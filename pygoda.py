@@ -61,8 +61,8 @@ class Ui_MainWindow(object):
             "data": [self.location_ui.lng_edit.text(), self.location_ui.lat_edit.text()] if self.geo else 
             self.location_ui.city_edit.text()
         }
-        resultWidget = QtWidgets.QWidget()
         print(data)
+        resultWidget = QtWidgets.QWidget()
         ui = ResultWidget(data)
         ui.setupUi(resultWidget)
         self.stackedWidget.addWidget(resultWidget)

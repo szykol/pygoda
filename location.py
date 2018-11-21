@@ -110,14 +110,3 @@ class LocationWidget(object):
         self.label.setText(_translate("Form", "Wprowadź nazwę miasta"))
         self.lat_edit.setPlaceholderText(_translate("Form", "Szerokość"))
         self.lng_edit.setPlaceholderText(_translate("Form", "Długość"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    Form = QtWidgets.QWidget()
-    ui = Ui_Form()
-    ui.setupUi(Form)
-    Form.show()
-    sys.exit(app.exec_())
-

@@ -11,6 +11,7 @@ from location import LocationWidget
 from result import ResultWidget
 from error import ErrorWidget
 from req import WeatherApi
+from coordinates import Geolocation
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -47,11 +48,17 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        self.location_ui.pushButton.setDisabled(True)
         self.location_ui.lat_edit.setValidator(QtGui.QDoubleValidator(-90.0, 90.0, 6))
         self.location_ui.lng_edit.setValidator(QtGui.QDoubleValidator(-180.0, 180.0, 6))
 
         self.geo = None
+        self.geo_api = Geolocation()
+
+        data = self.geo_api.get_city_name()
+        if data["status"]:
+            self.location_ui.city_edit.setText(data["data"])
+        else:
+            self.location_ui.pushButton.setDisabled(True)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -62,7 +69,7 @@ class Ui_MainWindow(object):
         if self.geo:
             lon, lat = self.location_ui.lng_edit.text(), self.location_ui.lat_edit.text()
             data = api.coord_weather(lon, lat)
-            data['city'] = f'{lon}, {lat}'.replace(',','.')
+            data['city'] = self.geo_api.get_city_name(lat, lon)["data"]
         else:
             data = api.city_weather(self.location_ui.city_edit.text())
             data['city'] = self.location_ui.city_edit.text()
@@ -85,7 +92,6 @@ class Ui_MainWindow(object):
     def clear_lat_lng(self):
         self.location_ui.lat_edit.clear()
         self.location_ui.lng_edit.clear()
-        self.location_ui.city_edit.setText(self.location_ui.city_edit.text().capitalize())
         self.update_button()
 
     def update_button(self):

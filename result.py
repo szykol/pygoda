@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from req import WeatherApi
+from images import images_dir
 import urllib 
 
 class ResultWidget(object):
@@ -91,9 +92,8 @@ class ResultWidget(object):
         if data['status'] == "ok":
             self.description.setText(data['main'])
             self.temperature.setText(data['temp'])
+            icon_name = images_dir[data["icon"]]
             pix = QtGui.QPixmap()
-            url = f'http://openweathermap.org/img/w/{data["icon"]}.png'
-            img_data = urllib.request.urlopen(url).read()
-            pix.loadFromData(img_data)
+            pix.load(f'img/{icon_name}.png')
             self.img.setPixmap(pix)
             self.img.show()

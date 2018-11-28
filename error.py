@@ -9,6 +9,10 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class ErrorWidget(object):
+    def __init__(self, message, button_text='Powrót'):
+        self.message = message
+        self.button_text = button_text
+
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(708, 568)
@@ -45,7 +49,6 @@ class ErrorWidget(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.description.setText(_translate("Form", "Nie udało się pobrać pogody.\n"
-" Sprawdź poprawność wprowadzonych danych"))
-        self.back_button.setText(_translate("Form", "Powrót"))
+        self.description.setText(_translate("Form", self.message))
+        self.back_button.setText(_translate("Form", self.button_text))
 

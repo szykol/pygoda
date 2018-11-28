@@ -89,7 +89,7 @@ class ResultWidget(object):
 
     def get_weather(self):
         data = self.data
-        if data['status'] == "ok":
+        if data['status']:
             self.description.setText(data['main'])
             self.temperature.setText(data['temp'])
             icon_name = images_dir[data["icon"]]

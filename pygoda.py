@@ -52,36 +52,51 @@ class Ui_MainWindow(object):
         self.location_ui.lng_edit.setValidator(QtGui.QDoubleValidator(-180.0, 180.0, 6))
 
         self.geo = None
-        self.geo_api = Geolocation()
 
-        data = self.geo_api.get_city_name()
-        if data["status"]:
-            self.location_ui.city_edit.setText(data["data"])
+        self.geo_api = None
+        if Geolocation.api_key_specified():
+            self.geo_api = Geolocation()
+            data = self.geo_api.get_city_name()
+            if data["status"]:
+                self.location_ui.city_edit.setText(data["data"])
         else:
             self.location_ui.pushButton.setDisabled(True)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "pygoda"))
+    def exit(self):
+        QtCore.QCoreApplication.quit()
 
     def click(self):
-        api = WeatherApi()
-        if self.geo:
-            lon, lat = self.location_ui.lng_edit.text(), self.location_ui.lat_edit.text()
-            data = api.coord_weather(lon, lat)
-            data['city'] = self.geo_api.get_city_name(lat, lon)["data"]
-        else:
-            data = api.city_weather(self.location_ui.city_edit.text())
-            data['city'] = self.location_ui.city_edit.text()
-
         resultWidget = QtWidgets.QWidget()
-        if(data['status'] == 'ok'):
-            ui = ResultWidget(data)
-        else:
-            ui = ErrorWidget()
 
-        ui.setupUi(resultWidget)
-        ui.back_button.clicked.connect(self.spawn_main_window)
+        if not WeatherApi.api_key_specified():
+            ui = ErrorWidget("Aplikacja nie posiada klucza do api pogody", 'Wyjscie')
+            ui.setupUi(resultWidget)
+            ui.back_button.clicked.connect(lambda:  QtCore.QCoreApplication.quit())
+
+        else:
+            api = WeatherApi()
+            if self.geo:
+                lon, lat = self.location_ui.lng_edit.text(), self.location_ui.lat_edit.text()
+                data = api.coord_weather(lon, lat)
+                if self.geo_api is not None:
+                    data['city'] = self.geo_api.get_city_name(lat, lon)["data"]
+                else:
+                    data['city'] = f'{lat} {lon}'.replace(',','.')
+            else:
+                data = api.city_weather(self.location_ui.city_edit.text())
+                data['city'] = self.location_ui.city_edit.text()
+
+            if(data['status']):
+                ui = ResultWidget(data)
+            else:
+                ui = ErrorWidget("Nie udało się pobrać pogody.\n"
+" Sprawdź poprawność wprowadzonych danych")
+
+            ui.setupUi(resultWidget)
+            ui.back_button.clicked.connect(self.spawn_main_window)
         self.stackedWidget.addWidget(resultWidget)
         self.stackedWidget.setCurrentWidget(resultWidget)
 

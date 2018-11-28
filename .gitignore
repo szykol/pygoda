@@ -1,5 +1,3 @@
 *.stackdump
 __pycache__/
 *.exe
-req.py
-coordinates.py

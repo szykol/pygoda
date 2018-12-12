@@ -9,9 +9,10 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from location import LocationWidget
 from result import ResultWidget
-from error import ErrorWidget
+from error import ErrorWidget 
 from req import WeatherApi
 from coordinates import Geolocation
+from translation import translate_text
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -85,9 +86,14 @@ class Ui_MainWindow(object):
                     data['city'] = self.geo_api.get_city_name(lat, lon)["data"]
                 else:
                     data['city'] = f'{lat} {lon}'.replace(',','.')
+                data['coords'] = (lat, lon)
             else:
-                data = api.city_weather(self.location_ui.city_edit.text())
+                translated_city_name = translate_text(self.location_ui.city_edit.text())
+                data = api.city_weather(translated_city_name)
                 data['city'] = self.location_ui.city_edit.text()
+                #data['coords'] = self.geo_api. 
+
+            
 
             if(data['status']):
                 ui = ResultWidget(data)

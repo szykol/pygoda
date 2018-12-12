@@ -10,11 +10,20 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from req import WeatherApi
 from images import images_dir
 import urllib 
+from webcams import WebcamsApi
+from webcams_window import WebcamsWindow
 
 class ResultWidget(object):
     def __init__(self, data):
         self.miasto = data['city']
         self.data = data
+        data = self.get_webcams()
+        self.MainWindow = QtWidgets.QMainWindow()
+        self.ui = WebcamsWindow(data)
+        self.ui.setupUi(self.MainWindow)
+        self.MainWindow.show()
+        
+       
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
@@ -76,9 +85,10 @@ class ResultWidget(object):
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
+
         self.city_name.setText(self.miasto)
         self.get_weather()
-
+        
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
@@ -97,3 +107,8 @@ class ResultWidget(object):
             pix.load(f'img/{icon_name}.png')
             self.img.setPixmap(pix)
             self.img.show()
+
+    def get_webcams(self):
+        api = WebcamsApi()
+        data = api.get_webcams_by_coord(50.0646501, 19.9449799)
+        return data

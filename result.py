@@ -17,13 +17,7 @@ class ResultWidget(object):
     def __init__(self, data):
         self.miasto = data['city']
         self.data = data
-        data = self.get_webcams()
-        self.MainWindow = QtWidgets.QMainWindow()
-        self.ui = WebcamsWindow(data)
-        self.ui.setupUi(self.MainWindow)
-        self.MainWindow.show()
         
-       
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
@@ -69,6 +63,20 @@ class ResultWidget(object):
         self.description.setAlignment(QtCore.Qt.AlignCenter)
         self.description.setObjectName("description")
         self.verticalLayout.addWidget(self.description)
+        self.pushButton = QtWidgets.QPushButton(Form)
+        self.pushButton.setEnabled(False)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton.sizePolicy().hasHeightForWidth())
+        self.pushButton.setSizePolicy(sizePolicy)
+        self.pushButton.setMinimumSize(QtCore.QSize(85, 60))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.pushButton.setFont(font)
+        self.pushButton.setStyleSheet("margin-bottom: 20")
+        self.pushButton.setObjectName("pushButton")
+        self.verticalLayout.addWidget(self.pushButton, 0, QtCore.Qt.AlignHCenter)
         self.back_button = QtWidgets.QPushButton(Form)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -95,6 +103,7 @@ class ResultWidget(object):
         self.city_name.setText(_translate("Form", "Miasto"))
         self.temperature.setText(_translate("Form", "22℃"))
         self.description.setText(_translate("Form", "Słonecznie"))
+        self.pushButton.setText(_translate("Form", "Kamerki"))
         self.back_button.setText(_translate("Form", "Gotowe"))
 
     def get_weather(self):
@@ -107,8 +116,3 @@ class ResultWidget(object):
             pix.load(f'img/{icon_name}.png')
             self.img.setPixmap(pix)
             self.img.show()
-
-    def get_webcams(self):
-        api = WebcamsApi()
-        data = api.get_webcams_by_coord(50.0646501, 19.9449799)
-        return data

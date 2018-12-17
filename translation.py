@@ -4,5 +4,3 @@ translate_client = translate.Client()
 
 def translate_text(text):
     return translate_client.translate(text,target_language='en')['translatedText']
-
-print(translate_text('Hej'))

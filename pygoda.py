@@ -13,6 +13,8 @@ from error import ErrorWidget
 from req import WeatherApi
 from coordinates import Geolocation
 from translation import translate_text
+from webcams import WebcamsApi
+from webcams_window import WebcamsWindow
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -91,18 +93,26 @@ class Ui_MainWindow(object):
                 translated_city_name = translate_text(self.location_ui.city_edit.text())
                 data = api.city_weather(translated_city_name)
                 data['city'] = self.location_ui.city_edit.text()
-                #data['coords'] = self.geo_api. 
+                coords = self.geo_api.get_coords_from_name(translated_city_name)
+                data['coords'] = (coords['lat'], coords['lng']) 
 
-            
-
+            temp = False
             if(data['status']):
                 ui = ResultWidget(data)
+                w_api = WebcamsApi()
+                self.webcams = w_api.get_webcams_by_coord(data['coords'][0], data['coords'][1])
+                temp = True                
             else:
                 ui = ErrorWidget("Nie udało się pobrać pogody.\n"
 " Sprawdź poprawność wprowadzonych danych")
 
             ui.setupUi(resultWidget)
             ui.back_button.clicked.connect(self.spawn_main_window)
+            if temp and len(self.webcams) > 0:
+                ui.pushButton.clicked.connect(self.spawn_webcam_window)
+                ui.pushButton.setDisabled(False)
+
+
         self.stackedWidget.addWidget(resultWidget)
         self.stackedWidget.setCurrentWidget(resultWidget)
 
@@ -128,6 +138,13 @@ class Ui_MainWindow(object):
 
     def spawn_main_window(self):
         self.stackedWidget.removeWidget(self.stackedWidget.currentWidget())
+
+    def spawn_webcam_window(self):
+        self.webcam_window = QtWidgets.QMainWindow()
+        self.webcam_ui = WebcamsWindow(self.webcams)
+        self.webcam_ui.setupUi(self.webcam_window)
+        self.webcam_ui.pushButton.clicked.connect(lambda: self.webcam_window.close())
+        self.webcam_window.show()
         
 if __name__ == "__main__":
     import sys
